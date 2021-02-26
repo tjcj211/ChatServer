@@ -50,6 +50,28 @@ public class ChatServer {
         // Process line that has been sent through the connection
         private void processLine(String line) {
             if (line != null) {
+            	if (line.startsWith("ENTER ")) {
+            		System.out.println("Entered");
+            	} else if (line.contentEquals("EXIT")) {
+            		
+            	} else if (line.startsWith("JOIN ")) {
+            		
+            	} else if (line.startsWith("TRANSMIT ")) {
+            		
+            	} else if (line.startsWith("ACK JOIN ")) {
+            		
+            	} else if (line.startsWith("ACK ENTER ")) {
+            		
+            	} else if (line.startsWith("NEWMESSAGE ")) {
+            		
+            	} else if (line.startsWith("ENTERING ")) {
+            		
+            	} else if (line.startsWith("EXITING ")) {
+            		
+            	} else {
+            		System.out.println("Invalid input");
+            	}
+            	//Sends this for debugging
                 System.out.println("Line from client: " + line);
                 out.println("Message Recieved.");
             }
