@@ -4,22 +4,26 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashSet;
 
 public class ChatServer {
     public static final int DEFAULT_PORT = 1518;
     public int port; // Port for this server
     public boolean done; //Is the server running?
+    public HashSet<Connection> connection;   // The set of client connections
 
     private class Connection extends Thread {
         Socket socket;
         PrintWriter out;
         BufferedReader in;
         boolean done; //Is the client still connected
+        String name;
 
         // Constructor
-        public Connection(Socket _socket) {
+        public Connection(Socket _socket, String _name) {
             this.socket = _socket;
             done = false;
+            name = _name;
         }
 
         // Try to run the thread for this connection
@@ -51,20 +55,24 @@ public class ChatServer {
         private void processLine(String line) {
             if (line != null) {
                 System.out.println("Line from client: " + line);
+                for (Connection client : connection) { //Iterate through clients and send the message.
+                    client.out.println(line);
+                }
                 out.println("Message Recieved.");
             }
-           
         }
     } /* End Connection Class */
 
     // Constructor
     public ChatServer(int _port) {
+        connection = new HashSet<Connection>();
         this.port = _port;
     }
 
     // Add a connection to a new client
-    public void addConnection(Socket clientSocket) {
-        Connection c = new Connection(clientSocket);
+    public void addConnection(Socket clientSocket, String name) {
+        Connection c = new Connection(clientSocket, name);
+        connection.add(c);
         c.start();    // Start the thread.
     }
 
@@ -77,7 +85,7 @@ public class ChatServer {
             while (!done) {
 
                 Socket clientSocket = serverSocket.accept();
-                addConnection(clientSocket);
+                addConnection(clientSocket, "");
             }
         } catch (Exception e) {
             System.err.println("ABORTING: An error occurred while creating server socket. " + e.getMessage());
