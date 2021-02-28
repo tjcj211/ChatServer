@@ -18,12 +18,14 @@ public class ChatServer {
         BufferedReader in;
         boolean done; //Is the client still connected
         String name;
+        String room;
 
         // Constructor
-        public Connection(Socket _socket, String _name) {
+        public Connection(Socket _socket, String _name, String _room) {
             this.socket = _socket;
             done = false;
             name = _name;
+            room = _room;
         }
 
         // Try to run the thread for this connection
@@ -55,34 +57,68 @@ public class ChatServer {
         private void processLine(String line) {
             if (line != null) {
             	if (line.startsWith("ENTER ")) {
-            		System.out.println("Entered");
+            		changeName(this, line.substring(6));
+            		processLine("ACK ENTER " + this.name);
+            		processLine("ENTERING " + this.name);
+            		
             	} else if (line.contentEquals("EXIT")) {
+            		//Exit the chat
             		
             	} else if (line.startsWith("JOIN ")) {
-            		
+            		this.setRoom(this, line.substring(5));
+            		processLine("ACK JOIN " + this.room);
+            	
             	} else if (line.startsWith("TRANSMIT ")) {
+            		processLine("NEWMESSAGE " + this.name + " " + line.substring(9));
             		
             	} else if (line.startsWith("ACK JOIN ")) {
+            		out.println("You have joined the room " + line.substring(9));
             		
             	} else if (line.startsWith("ACK ENTER ")) {
+            		out.println("You have been registered with the name " + line.substring(10));
             		
             	} else if (line.startsWith("NEWMESSAGE ")) {
+            		String[] array = line.split(" ");
+        			String message = "[" + this.room + "] <" + array[1] + "> " + line.substring(line.indexOf(array[2]));
+            		for (Connection client : connection) {
+            			if (client.room.equals(this.room)) {
+            				client.out.println(message);
+            			}
+            		}
             		
             	} else if (line.startsWith("ENTERING ")) {
-            		
+            		for (Connection client : connection) {
+            			if (client.room.equals(this.room)) {
+            				client.out.println(this.name + " has entered");
+            			}
+            		}
             	} else if (line.startsWith("EXITING ")) {
+            		//Send to all clients that the client has left
             		
             	} else {
-            		System.out.println("Invalid input");
+            		out.println("Invalid input");
+            		
             	}
             	//Sends this for debugging
                 System.out.println("Line from client: " + line);
+               
+                /*
                 for (Connection client : connection) { //Iterate through clients and send the message.
                     client.out.println(line);
                 }
                 out.println("Message Recieved.");
+                */
             }
         }
+        
+        public void changeName(Connection connection, String name) {
+        	connection.name = name;
+        }
+        
+        public void setRoom(Connection connection, String room) {
+        	connection.room = room;
+        }
+
     } /* End Connection Class */
 
     // Constructor
@@ -92,8 +128,8 @@ public class ChatServer {
     }
 
     // Add a connection to a new client
-    public void addConnection(Socket clientSocket, String name) {
-        Connection c = new Connection(clientSocket, name);
+    public void addConnection(Socket clientSocket, String name, String room) {
+        Connection c = new Connection(clientSocket, name, room);
         connection.add(c);
         c.start();    // Start the thread.
     }
@@ -107,7 +143,7 @@ public class ChatServer {
             while (!done) {
 
                 Socket clientSocket = serverSocket.accept();
-                addConnection(clientSocket, "");
+                addConnection(clientSocket, "", "0");
             }
         } catch (Exception e) {
             System.err.println("ABORTING: An error occurred while creating server socket. " + e.getMessage());
