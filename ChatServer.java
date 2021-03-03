@@ -63,7 +63,7 @@ public class ChatServer {
             		
             	} else if (line.contentEquals("EXIT")) {
             		processLine("EXITING " + this.name);
-                    this.room = "0";
+                    done = true;
             		
             	} else if (line.startsWith("JOIN ")) {
                     processLine("EXITING " + this.name);
