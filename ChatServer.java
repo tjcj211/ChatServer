@@ -62,17 +62,20 @@ public class ChatServer {
             		processLine("ENTERING " + this.name);
             		
             	} else if (line.contentEquals("EXIT")) {
-            		//Exit the chat
+            		processLine("EXITING " + this.name);
+                    this.room = "0";
             		
             	} else if (line.startsWith("JOIN ")) {
+                    processLine("EXITING " + this.name);
             		this.setRoom(this, line.substring(5));
             		processLine("ACK JOIN " + this.room);
+                    processLine("ENTERING " + this.room);
             	
             	} else if (line.startsWith("TRANSMIT ")) {
             		processLine("NEWMESSAGE " + this.name + " " + line.substring(9));
             		
             	} else if (line.startsWith("ACK JOIN ")) {
-            		out.println("You have joined the room " + line.substring(9));
+            		out.println("You have joined room " + line.substring(9));
             		
             	} else if (line.startsWith("ACK ENTER ")) {
             		out.println("You have been registered with the name " + line.substring(10));
@@ -94,13 +97,21 @@ public class ChatServer {
             		}
             	} else if (line.startsWith("EXITING ")) {
             		//Send to all clients that the client has left
-            		
+            		for (Connection client : connection) {
+            			if (client.room.equals(this.room)) {
+                            if (client.name == this.name) {
+                                client.out.println("You have left room " + this.room);
+                            } else {
+                                client.out.println(this.name + " has left the room"); 
+                            }
+            			}
+            		}
             	} else {
             		out.println("Invalid input");
             		
             	}
             	//Sends this for debugging
-                System.out.println("Line from client: " + line);
+                //System.out.println("Line from client: " + line);
                
                 /*
                 for (Connection client : connection) { //Iterate through clients and send the message.
