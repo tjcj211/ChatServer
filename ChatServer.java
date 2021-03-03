@@ -92,7 +92,7 @@ public class ChatServer {
             	} else if (line.startsWith("ENTERING ")) {
             		for (Connection client : connection) {
             			if (client.room.equals(this.room)) {
-            				client.out.println(this.name + " has entered");
+            				client.out.println(this.name + " has entered the room");
             			}
             		}
             	} else if (line.startsWith("EXITING ")) {
