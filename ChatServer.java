@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -11,6 +12,8 @@ public class ChatServer {
     public int port; // Port for this server
     public boolean done; //Is the server running?
     public HashSet<Connection> connection;   // The set of client connections
+    public File log = new File("log.txt");
+    public PrintWriter logWriter;
 
     private class Connection extends Thread {
         Socket socket;
@@ -62,6 +65,8 @@ public class ChatServer {
             		processLine("ENTERING " + this.name);
             		
             	} else if (line.contentEquals("EXIT")) {
+                    logWriter.println(this.name + " is exiting");
+                    logWriter.flush();
             		processLine("EXITING " + this.name);
                     done = true;
             		
@@ -83,6 +88,8 @@ public class ChatServer {
             	} else if (line.startsWith("NEWMESSAGE ")) {
             		String[] array = line.split(" ");
         			String message = "[" + this.room + "] <" + array[1] + "> " + line.substring(line.indexOf(array[2]));
+                    logWriter.println(message);
+                    logWriter.flush();
             		for (Connection client : connection) {
             			if (client.room.equals(this.room)) {
             				client.out.println(message);
@@ -90,12 +97,16 @@ public class ChatServer {
             		}
             		
             	} else if (line.startsWith("ENTERING ")) {
+                    logWriter.println(this.name + " has entered room " + this.room);
+                    logWriter.flush();
             		for (Connection client : connection) {
             			if (client.room.equals(this.room)) {
             				client.out.println(this.name + " has entered the room");
             			}
             		}
             	} else if (line.startsWith("EXITING ")) {
+                    logWriter.println(this.name + " has left room " + this.room);
+                    logWriter.flush();
             		//Send to all clients that the client has left
             		for (Connection client : connection) {
             			if (client.room.equals(this.room)) {
@@ -136,6 +147,11 @@ public class ChatServer {
     public ChatServer(int _port) {
         connection = new HashSet<Connection>();
         this.port = _port;
+        try {
+            logWriter = new PrintWriter(log);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     // Add a connection to a new client
@@ -148,14 +164,16 @@ public class ChatServer {
     //Run the server and listen for connections
     public void run() {
         System.out.println("Starting Server on port... " + port);
+        logWriter.println("Starting Server on port... " + port);
+        logWriter.flush();
         try {
             ServerSocket serverSocket = new ServerSocket(port);
-
             while (!done) {
-
                 Socket clientSocket = serverSocket.accept();
                 addConnection(clientSocket, "", "0");
             }
+            if (serverSocket != null) serverSocket.close();
+            if (logWriter != null) logWriter.close();
         } catch (Exception e) {
             System.err.println("ABORTING: An error occurred while creating server socket. " + e.getMessage());
             System.exit(1);
