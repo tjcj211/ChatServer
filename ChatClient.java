@@ -1,3 +1,4 @@
+
 /******
  * ChatClient
  * Author: Christian Duncan 
@@ -15,6 +16,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class ChatClient extends JFrame {
     public static void main(String[] args) {
@@ -32,6 +38,13 @@ public class ChatClient extends JFrame {
     private String hostname = "127.0.0.1";  // Default is local host
     private int port = 1518;                // Default port is 1518
     private String userName = "<UNDEFINED>";
+
+    // Variables needed to reference server
+    private Socket server;
+    private PrintWriter out;
+    private BufferedReader in;
+    private boolean done;
+    private String serverMessage = "";
     
     /* Constructor: Sets up the initial look-and-feel */
     public ChatClient() {
@@ -76,7 +89,7 @@ public class ChatClient extends JFrame {
                         // There is something to transmit
                         // NOTE: You will want to fix this so it actually
                         // TRANSMITS the message to the server!
-                        postMessage("DEBUG: Transmit: " + message);
+                        postMessage("TRANSMIT " + message);
                         sendTextArea.setText("");  // Clear out the field
                     }
                     sendTextArea.requestFocus();  // Focus back on box
@@ -101,7 +114,7 @@ public class ChatClient extends JFrame {
                     String newUserName = JOptionPane.showInputDialog("Please enter a user name.  Current user name: " + userName);
                     // NOTE: This does not TRANSMIT the request to the server
                     // This is just a placeholder to display the choice.
-                    postMessage("DEBUG: User name: " + newUserName);
+                    postMessage("ENTER " + newUserName);
                     changeUserName(newUserName); // Ideally, this would be done only once the server accepts and replies back with user name
                 }
             };
@@ -173,7 +186,9 @@ public class ChatClient extends JFrame {
         // Menu item to create a connection
         menuAction = new AbstractAction("Connect to Server") {
                 public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(null, "This is not yet implemented!\nPlease try again later.", "Unimplemented Option", JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Connecting to server: " + hostname + ":" + port, "Connecting To Server", JOptionPane.PLAIN_MESSAGE);
+                    // Establish the connection to the server
+                    establishConnection(hostname, port);
                 }
             };
         menuAction.putValue(Action.SHORT_DESCRIPTION, "Change server PORT.");
@@ -182,6 +197,22 @@ public class ChatClient extends JFrame {
 
         mbar.add(menu);
         setJMenuBar(mbar);
+    }
+
+    public void establishConnection(String hostname, int port) {
+        try {
+            server = new Socket(hostname, port);
+            out = new PrintWriter(server.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            done = false;
+            postMessage("ENTER " + userName);
+            
+            in.close();
+            out.close();
+            server.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     // Changes the user name on the nameAction
@@ -193,6 +224,8 @@ public class ChatClient extends JFrame {
 
     // Post a message on the main Chat Text Area (with a new line)
     public synchronized void postMessage(String message) {
-        chatTextArea.append(message + "\n");
+        if (out != null) {
+            out.println(message);
+        }
     }
 }
