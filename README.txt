@@ -26,8 +26,9 @@ A breakdown of the work that each member of the team did, what parts were contri
         - Server disconnects client when they exit
 
     Giovanni Greco
-        -
-
+        - Attempted to make client connect to server
+        - Attempted to make client send and recieve messages and display the messages in the two text areas
+        
     Ryan Hayes
         -
 
