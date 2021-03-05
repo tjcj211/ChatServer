@@ -42,7 +42,7 @@ A breakdown of the work that each member of the team did, what parts were contri
         -
 
     Aden Mariyappa
-        -
+        - Attempted to make client send and recieve messages and display the messages in the two text areas
 
 
 A description of how the tasks were divided out among the members.
