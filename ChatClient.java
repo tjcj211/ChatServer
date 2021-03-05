@@ -116,8 +116,6 @@ public class ChatClient extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     // Get the new user name and transmit to the server!
                     String newUserName = JOptionPane.showInputDialog("Please enter a user name.  Current user name: " + userName);
-                    // NOTE: This does not TRANSMIT the request to the server
-                    // This is just a placeholder to display the choice.
                     postMessage("ENTER " + newUserName);
                     changeUserName(newUserName); // Ideally, this would be done only once the server accepts and replies back with user name
                 }
@@ -208,6 +206,7 @@ public class ChatClient extends JFrame {
         setJMenuBar(mbar);
     }
 
+    // Establish the connection with the server
     public void establishConnection(String hostname, int port) {
         try {
             server = new Socket(hostname, port);
@@ -227,6 +226,7 @@ public class ChatClient extends JFrame {
         nameAction.putValue(Action.NAME, "User Name: " + userName);
     }
 
+    // Recieve the message from the server and put it in the chat box
     public void recieveMessage() {
         try {
             if ((serverMessage = in.readLine()) != "") {
