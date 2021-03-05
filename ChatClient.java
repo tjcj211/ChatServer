@@ -1,7 +1,8 @@
+
 /******
  * ChatClient
  * Author: Christian Duncan 
- * Updated by: ...
+ * Updated by: Timothy Carta
  *
  * This code provides a basic GUI ChatClient.
  * It is a single frame made of 3 parts:
@@ -9,12 +10,15 @@
  *    An input textbox for entering in messages to send
  *    A "send" button to send the current textbox material.
  *
- * THIS IS JUST A FRAMEWORK so actual communication is not yet 
- * established.
  ******/
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class ChatClient extends JFrame {
     public static void main(String[] args) {
@@ -24,6 +28,10 @@ public class ChatClient extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+
+        while (!frame.done) {
+            frame.recieveMessage();
+        }
     }
 
     private JTextArea chatTextArea;
@@ -32,6 +40,13 @@ public class ChatClient extends JFrame {
     private String hostname = "127.0.0.1";  // Default is local host
     private int port = 1518;                // Default port is 1518
     private String userName = "<UNDEFINED>";
+
+    // Variables needed to reference server
+    private Socket server;
+    private PrintWriter out;
+    private BufferedReader in;
+    private boolean done;
+    private String serverMessage = "";
     
     /* Constructor: Sets up the initial look-and-feel */
     public ChatClient() {
@@ -73,10 +88,10 @@ public class ChatClient extends JFrame {
                     // and clear the text area
                     String message = sendTextArea.getText();
                     if (message != null && message != "") {
-                        // There is something to transmit
-                        // NOTE: You will want to fix this so it actually
                         // TRANSMITS the message to the server!
-                        postMessage("DEBUG: Transmit: " + message);
+                        for (String m : message.split("\\n")) {
+                            postMessage("TRANSMIT " + m);
+                        }
                         sendTextArea.setText("");  // Clear out the field
                     }
                     sendTextArea.requestFocus();  // Focus back on box
@@ -99,9 +114,7 @@ public class ChatClient extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     // Get the new user name and transmit to the server!
                     String newUserName = JOptionPane.showInputDialog("Please enter a user name.  Current user name: " + userName);
-                    // NOTE: This does not TRANSMIT the request to the server
-                    // This is just a placeholder to display the choice.
-                    postMessage("DEBUG: User name: " + newUserName);
+                    postMessage("ENTER " + newUserName);
                     changeUserName(newUserName); // Ideally, this would be done only once the server accepts and replies back with user name
                 }
             };
@@ -116,7 +129,7 @@ public class ChatClient extends JFrame {
     }
 
     private void setupTextAreaSend(Action sendAction) {
-        System.err.println("DEBUG: Setting up TextAreaSend");
+        //System.err.println("DEBUG: Setting up TextAreaSend");
         // Get InputMap and ActionMap for the sendTextArea
         InputMap inputMap = sendTextArea.getInputMap();
         ActionMap actionMap = sendTextArea.getActionMap();
@@ -135,6 +148,19 @@ public class ChatClient extends JFrame {
         JMenuItem menuItem;
         Action menuAction;
         menu = new JMenu("Connection");
+
+        // Menu item to change rooms
+        menuAction = new AbstractAction("Change Room") {
+            public void actionPerformed(ActionEvent e) {
+                String newRoom = JOptionPane.showInputDialog("Please enter a room name to join");
+                if (server.isConnected()) {
+                    postMessage("JOIN " + newRoom);
+                }
+            }
+        };
+        menuAction.putValue(Action.SHORT_DESCRIPTION, "Change Room");
+        menuItem = new JMenuItem(menuAction);
+        menu.add(menuItem);
 
         // Menu item to change server IP address (or hostname really)
         menuAction = new AbstractAction("Change Server IP") {
@@ -173,15 +199,36 @@ public class ChatClient extends JFrame {
         // Menu item to create a connection
         menuAction = new AbstractAction("Connect to Server") {
                 public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(null, "This is not yet implemented!\nPlease try again later.", "Unimplemented Option", JOptionPane.PLAIN_MESSAGE);
+                    if (userName != "<UNDEFINED>") {
+                        JOptionPane.showMessageDialog(null, "Connecting to server: " + hostname + ":" + port, "Connecting To Server", JOptionPane.PLAIN_MESSAGE);
+                        // Establish the connection to the server
+                        establishConnection(hostname, port);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Please enter a username", "Enter Username", JOptionPane.PLAIN_MESSAGE);
+                    }
+                    
                 }
             };
         menuAction.putValue(Action.SHORT_DESCRIPTION, "Change server PORT.");
         menuItem = new JMenuItem(menuAction);
-        menu.add(menuItem);        
+        menu.add(menuItem); 
 
         mbar.add(menu);
         setJMenuBar(mbar);
+    }
+
+    // Establish the connection with the server
+    public void establishConnection(String hostname, int port) {
+        try {
+            server = new Socket(hostname, port);
+            out = new PrintWriter(server.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            done = false;
+            postMessage("ENTER " + userName);
+            
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     // Changes the user name on the nameAction
@@ -190,9 +237,22 @@ public class ChatClient extends JFrame {
         nameAction.putValue(Action.NAME, "User Name: " + userName);
     }
 
+    // Recieve the message from the server and put it in the chat box
+    public void recieveMessage() {
+        try {
+            if ((serverMessage = in.readLine()) != "") {
+                chatTextArea.append(serverMessage + "\n");
+            }
+        } catch (Exception e) {
+            
+        }
+    }
+
 
     // Post a message on the main Chat Text Area (with a new line)
     public synchronized void postMessage(String message) {
-        chatTextArea.append(message + "\n");
+        if (out != null) {
+            out.println(message);
+        }
     }
 }
