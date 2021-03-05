@@ -4,12 +4,12 @@ The names of everyone on the team. The names should also appear in the commentin
 
 Instructions on how to compile and run both the server and client code.
     Navigate to the folder where ChatServer.java is held using a terminal
-    "javac ChatServer.java"
-    "java ChatServer"
+    exexute "javac ChatServer.java"
+    exexute "java ChatServer"
 
     Navigate to the folder where ChatClient.java is held using a terminal
-    "javac ChatClient.java"
-    "java ChatClient"
+    execute "javac ChatClient.java"
+    execute "java ChatClient"
 
 
 A breakdown of the work that each member of the team did, what parts were contributed by that individual.
