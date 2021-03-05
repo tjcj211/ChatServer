@@ -151,6 +151,19 @@ public class ChatClient extends JFrame {
         Action menuAction;
         menu = new JMenu("Connection");
 
+        // Menu item to change rooms
+        menuAction = new AbstractAction("Change Room") {
+            public void actionPerformed(ActionEvent e) {
+                String newRoom = JOptionPane.showInputDialog("Please enter a room name to join");
+                if (server.isConnected()) {
+                    postMessage("JOIN " + newRoom);
+                }
+            }
+        };
+        menuAction.putValue(Action.SHORT_DESCRIPTION, "Change Room");
+        menuItem = new JMenuItem(menuAction);
+        menu.add(menuItem);
+
         // Menu item to change server IP address (or hostname really)
         menuAction = new AbstractAction("Change Server IP") {
                 public void actionPerformed(ActionEvent e) {
@@ -201,19 +214,6 @@ public class ChatClient extends JFrame {
         menuAction.putValue(Action.SHORT_DESCRIPTION, "Change server PORT.");
         menuItem = new JMenuItem(menuAction);
         menu.add(menuItem); 
-        
-        // Menu item to change rooms
-        menuAction = new AbstractAction("Change Room") {
-            public void actionPerformed(ActionEvent e) {
-                String newRoom = JOptionPane.showInputDialog("Please enter a room name to join");
-                if (server.isConnected()) {
-                    postMessage("JOIN " + newRoom);
-                }
-            }
-        };
-        menuAction.putValue(Action.SHORT_DESCRIPTION, "Change Room");
-        menuItem = new JMenuItem(menuAction);
-        menu.add(menuItem);
 
         mbar.add(menu);
         setJMenuBar(mbar);
