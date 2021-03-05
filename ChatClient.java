@@ -30,6 +30,10 @@ public class ChatClient extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+
+        while (!frame.done) {
+            frame.recieveMessage();
+        }
     }
 
     private JTextArea chatTextArea;
@@ -86,10 +90,10 @@ public class ChatClient extends JFrame {
                     // and clear the text area
                     String message = sendTextArea.getText();
                     if (message != null && message != "") {
-                        // There is something to transmit
-                        // NOTE: You will want to fix this so it actually
                         // TRANSMITS the message to the server!
-                        postMessage("TRANSMIT " + message);
+                        for (String m : message.split("\\n")) {
+                            postMessage("TRANSMIT " + m);
+                        }
                         sendTextArea.setText("");  // Clear out the field
                     }
                     sendTextArea.requestFocus();  // Focus back on box
@@ -129,7 +133,7 @@ public class ChatClient extends JFrame {
     }
 
     private void setupTextAreaSend(Action sendAction) {
-        System.err.println("DEBUG: Setting up TextAreaSend");
+        //System.err.println("DEBUG: Setting up TextAreaSend");
         // Get InputMap and ActionMap for the sendTextArea
         InputMap inputMap = sendTextArea.getInputMap();
         ActionMap actionMap = sendTextArea.getActionMap();
@@ -186,9 +190,14 @@ public class ChatClient extends JFrame {
         // Menu item to create a connection
         menuAction = new AbstractAction("Connect to Server") {
                 public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(null, "Connecting to server: " + hostname + ":" + port, "Connecting To Server", JOptionPane.PLAIN_MESSAGE);
-                    // Establish the connection to the server
-                    establishConnection(hostname, port);
+                    if (userName != "<UNDEFINED>") {
+                        JOptionPane.showMessageDialog(null, "Connecting to server: " + hostname + ":" + port, "Connecting To Server", JOptionPane.PLAIN_MESSAGE);
+                        // Establish the connection to the server
+                        establishConnection(hostname, port);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Please enter a username", "Enter Username", JOptionPane.PLAIN_MESSAGE);
+                    }
+                    
                 }
             };
         menuAction.putValue(Action.SHORT_DESCRIPTION, "Change server PORT.");
@@ -207,11 +216,8 @@ public class ChatClient extends JFrame {
             done = false;
             postMessage("ENTER " + userName);
             
-            in.close();
-            out.close();
-            server.close();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -219,6 +225,16 @@ public class ChatClient extends JFrame {
     public void changeUserName(String newName) {
         userName = newName;
         nameAction.putValue(Action.NAME, "User Name: " + userName);
+    }
+
+    public void recieveMessage() {
+        try {
+            if ((serverMessage = in.readLine()) != "") {
+                chatTextArea.append(serverMessage + "\n");
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
 

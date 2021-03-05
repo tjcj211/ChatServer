@@ -59,6 +59,7 @@ public class ChatServer {
 
             //Close the socket and I/O streams associated with it
             try {
+                processLine("EXIT");
                 System.out.println("The Client is closing down.");
                 if (in != null) in.close();
                 if (out != null) out.close();
@@ -187,6 +188,7 @@ public class ChatServer {
                 addConnection(clientSocket, "", "0");
             }
             // Close the socket and the logger if the server stops
+            
             if (serverSocket != null) serverSocket.close();
             if (logWriter != null) logWriter.close();
         } catch (Exception e) {
