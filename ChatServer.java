@@ -99,8 +99,7 @@ public class ChatServer {
             		out.println("You have been registered with the name " + line.substring(10));
             		
             	} else if (line.startsWith("NEWMESSAGE ")) { //Sends message to all clients in the same room as the client
-            		String[] array = line.split(" ");
-        			String message = "[" + this.room + "] <" + array[1] + "> " + line.substring(line.indexOf(array[2]));
+        			String message = "[" + this.room + "] <" + this.name + "> " + line.substring(11 + this.name.length());
                     logWriter.println(message);
                     logWriter.flush();
             		for (Connection client : connection) {
