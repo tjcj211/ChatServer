@@ -4,8 +4,8 @@ The names of everyone on the team. The names should also appear in the commentin
 
 Instructions on how to compile and run both the server and client code.
     Navigate to the folder where ChatServer.java is held using a terminal
-    exexute "javac ChatServer.java"
-    exexute "java ChatServer"
+    execute "javac ChatServer.java"
+    execute "java ChatServer"
 
     Navigate to the folder where ChatClient.java is held using a terminal
     execute "javac ChatClient.java"
