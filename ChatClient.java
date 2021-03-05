@@ -2,7 +2,7 @@
 /******
  * ChatClient
  * Author: Christian Duncan 
- * Updated by: ...
+ * Updated by: Timothy Carta
  *
  * This code provides a basic GUI ChatClient.
  * It is a single frame made of 3 parts:
@@ -200,7 +200,20 @@ public class ChatClient extends JFrame {
             };
         menuAction.putValue(Action.SHORT_DESCRIPTION, "Change server PORT.");
         menuItem = new JMenuItem(menuAction);
-        menu.add(menuItem);        
+        menu.add(menuItem); 
+        
+        // Menu item to change rooms
+        menuAction = new AbstractAction("Change Room") {
+            public void actionPerformed(ActionEvent e) {
+                String newRoom = JOptionPane.showInputDialog("Please enter a room name to join");
+                if (server.isConnected()) {
+                    postMessage("JOIN " + newRoom);
+                }
+            }
+        };
+        menuAction.putValue(Action.SHORT_DESCRIPTION, "Change Room");
+        menuItem = new JMenuItem(menuAction);
+        menu.add(menuItem);
 
         mbar.add(menu);
         setJMenuBar(mbar);
@@ -233,7 +246,7 @@ public class ChatClient extends JFrame {
                 chatTextArea.append(serverMessage + "\n");
             }
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            
         }
     }
 
