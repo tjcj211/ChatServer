@@ -30,7 +30,13 @@ A breakdown of the work that each member of the team did, what parts were contri
         - Attempted to make client send and recieve messages and display the messages in the two text areas
         
     Ryan Hayes
-        -
+        - User enters the chatroom with a specified name (ENTER)
+        - User entering the chatroom notifies the server which notifies the other clients (ACK ENTER, ENTERING)
+        - User can specify which room they want to join and the server acknowledges the request (JOIN, ACK JOIN)
+        - User can transmit messages to the server which tells the server to transmit the message to other clients (TRANSMIT, NEWMESSAGE)
+        - Added room support by adding the additional flags to the necessary methods
+        - Added the checks to see which room the user was in so they received the correct messages
+        - Bug fixes
 
     Griffin King
         -
