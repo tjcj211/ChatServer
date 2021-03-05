@@ -10,8 +10,6 @@
  *    An input textbox for entering in messages to send
  *    A "send" button to send the current textbox material.
  *
- * THIS IS JUST A FRAMEWORK so actual communication is not yet 
- * established.
  ******/
 import javax.swing.*;
 import java.awt.*;
